@@ -7,12 +7,12 @@
 @font-face { font-family: "Literata"; src: url("../fonts/literata-v40-latin-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Inter"; src: url("../fonts/inter-v20-latin-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Inter"; src: url("../fonts/inter-v20-latin-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-/* NOTE: verify actual downloaded filenames in fonts/ and fix these urls to match. */
 
 /* ===== tokens ===== */
 :root {
   --ink: #171020;          /* deep plum-ink page ground */
   --ink-deep: #100a18;     /* deeper wells: header, reader backdrop */
+  --ink-glow: #241732;     /* faint warm glow at top of page */
   --card: #211830;         /* card surface */
   --parchment: #f0e7d8;    /* primary text */
   --parchment-dim: #b9aea6;/* secondary text */
@@ -28,7 +28,7 @@
 * { box-sizing: border-box; margin: 0; }
 html { scroll-behavior: smooth; }
 body {
-  background: radial-gradient(120% 80% at 50% -10%, #241732 0%, var(--ink) 55%) fixed var(--ink);
+  background: radial-gradient(120% 80% at 50% -10%, var(--ink-glow) 0%, var(--ink) 55%) fixed var(--ink);
   color: var(--parchment);
   font-family: var(--font-body);
   line-height: 1.65;
