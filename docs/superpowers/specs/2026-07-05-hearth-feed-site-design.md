@@ -33,6 +33,7 @@ D:\Project\Blog\
 ├── js/doodles.js            — all 34 SVG doodles + default "young flame" doodle
 ├── data/posts.json          — 34 essays: slug, title, date, full sanitized HTML,
 │                              excerpt, moods[], doodleId, bloggerUrl, readLength
+├── data/curation.json       — per-post moods + doodleId assignments (merged by the script)
 ├── fonts/                   — self-hosted woff2: Fraunces, Literata, Inter (subsets)
 ├── scripts/refresh_posts.py — regenerates posts.json from the Blogger JSON feed
 └── docs/superpowers/specs/  — design docs
@@ -47,10 +48,12 @@ functional from the repo files alone.
    `https://deepcurrentswrites.blogspot.com/feeds/posts/default?alt=json&max-results=500`,
    sanitizes each post's HTML (strip scripts/iframes/inline styles/Blogger
    cruft), derives slug, excerpt, and read length, and writes `posts.json`.
-   Moods and doodle assignments live in a curation map inside the script (or
-   an adjacent JSON) so re-running never destroys curation.
-2. **Live refresh:** on page load, `app.js` fetches the same Blogger JSON
-   feed in the background. Posts whose IDs are not in `posts.json` are
+   Moods and doodle assignments live in `data/curation.json` (keyed by post
+   ID) which the script merges in, so re-running never destroys curation.
+2. **Live refresh:** on page load, `app.js` loads the Blogger feed in the
+   background via its JSONP variant (`alt=json-in-script&callback=…`,
+   injected as a script tag), since Blogger's plain JSON feed does not
+   reliably send CORS headers. Posts whose IDs are not in `posts.json` are
    prepended to the feed marked as fresh, with the default "young flame"
    doodle and a keyword-guessed mood. If the fetch fails (offline, Blogger
    down, CORS), it fails silently — the site works entirely from
@@ -101,7 +104,7 @@ Ember-gold strokes on the dark ground. No image files. Posts not yet
 curated use the default "young flame" doodle.
 
 The essays' content will be read from the feed during implementation to
-design each doodle; doodle-to-post assignments recorded in the curation map.
+design each doodle; doodle-to-post assignments recorded in `data/curation.json`.
 
 ## Moods
 
