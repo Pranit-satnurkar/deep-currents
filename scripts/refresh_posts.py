@@ -26,6 +26,7 @@ class Sanitizer(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.out, self.skip, self.divdepth = [], 0, 0
+        self.divmark = None  # index into self.out where the depth-1 div began
 
     def handle_starttag(self, tag, attrs):
         if tag in DROP_WITH_CONTENT:
@@ -36,7 +37,7 @@ class Sanitizer(HTMLParser):
         if tag == "div":
             self.divdepth += 1
             if self.divdepth == 1:
-                self.out.append("<p>")
+                self.divmark = len(self.out)
             return
         if tag in UNWRAP:
             return
@@ -62,8 +63,13 @@ class Sanitizer(HTMLParser):
         if self.skip:
             return
         if tag == "div":
-            if self.divdepth == 1:
-                self.out.append("</p>")
+            if self.divdepth == 1 and self.divmark is not None:
+                inner = "".join(self.out[self.divmark:])
+                has_block = any(f"<{t}>" in inner for t in
+                                ("p", "ul", "ol", "blockquote", "h2", "h3", "h4"))
+                if not has_block:
+                    self.out[self.divmark:] = ["<p>", inner, "</p>"]
+                self.divmark = None
             self.divdepth = max(0, self.divdepth - 1)
             return
         if tag in UNWRAP or tag not in KEEP or tag in ("br", "img"):
@@ -87,7 +93,7 @@ def sanitize_html(raw):
 def slugify(title, maxlen=48):
     t = unicodedata.normalize("NFKD", title)
     t = "".join(c for c in t if not unicodedata.combining(c))
-    t = re.sub(r"[''']", "", t.lower())
+    t = re.sub(r"[‘’']", "", t.lower())
     t = re.sub(r"[^a-z0-9]+", "-", t).strip("-")
     if len(t) > maxlen:
         t = t[:maxlen].rsplit("-", 1)[0]
@@ -98,7 +104,8 @@ def post_num_id(entry_id):
     return m.group(1) if m else entry_id
 
 def strip_tags(markup):
-    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", markup)).strip()
+    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", markup)).strip()
+    return html.unescape(text)
 
 def excerpt_of(text, limit=220):
     if len(text) <= limit:
@@ -112,11 +119,12 @@ def read_length(words):
         return "an evening ember"
     return "a long night"
 
-def build(feed):
-    curation_path = ROOT / "data" / "curation.json"
-    curation = {}
-    if curation_path.exists():
-        curation = json.loads(curation_path.read_text(encoding="utf-8"))
+def build(feed, curation=None):
+    if curation is None:
+        curation = {}
+        curation_path = ROOT / "data" / "curation.json"
+        if curation_path.exists():
+            curation = json.loads(curation_path.read_text(encoding="utf-8"))
     posts = []
     for e in feed["feed"].get("entry", []):
         pid = post_num_id(e["id"]["$t"])
