@@ -1,0 +1,62 @@
+/* ===== fonts (self-hosted) ===== */
+@font-face { font-family: "Fraunces"; src: url("../fonts/fraunces-v38-latin-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("../fonts/fraunces-v38-latin-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("../fonts/fraunces-v38-latin-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Literata"; src: url("../fonts/literata-v40-latin-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Literata"; src: url("../fonts/literata-v40-latin-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Literata"; src: url("../fonts/literata-v40-latin-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("../fonts/inter-v20-latin-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("../fonts/inter-v20-latin-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+/* NOTE: verify actual downloaded filenames in fonts/ and fix these urls to match. */
+
+/* ===== tokens ===== */
+:root {
+  --ink: #171020;          /* deep plum-ink page ground */
+  --ink-deep: #100a18;     /* deeper wells: header, reader backdrop */
+  --card: #211830;         /* card surface */
+  --parchment: #f0e7d8;    /* primary text */
+  --parchment-dim: #b9aea6;/* secondary text */
+  --ember: #e8a04c;        /* warm ember-gold accent */
+  --ember-bright: #ffc46b; /* lit/hover states */
+  --dusty: #8fa3c7;        /* dusty blue secondary details */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Literata", Georgia, serif;
+  --font-label: "Inter", system-ui, sans-serif;
+}
+
+/* ===== base ===== */
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: radial-gradient(120% 80% at 50% -10%, #241732 0%, var(--ink) 55%) fixed var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--ember); text-decoration: none; }
+a:hover, a:focus-visible { color: var(--ember-bright); }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 2px; }
+img { max-width: 100%; height: auto; }
+
+/* ===== header ===== */
+.hearth-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.1rem 0.6rem;
+  max-width: 46rem; margin: 0 auto;
+}
+.brand { display: flex; align-items: center; gap: 0.65rem; color: var(--parchment); }
+.brand-name { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; display: block; letter-spacing: 0.01em; }
+.brand-tag { font-family: var(--font-label); font-size: 0.68rem; color: var(--parchment-dim); letter-spacing: 0.06em; display: block; }
+#headerFlame { width: 34px; height: 42px; display: inline-block; }
+.hearth-nav { display: flex; gap: 1rem; font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.04em; }
+.hearth-nav a { color: var(--parchment-dim); }
+.hearth-nav a:hover { color: var(--ember); }
+
+main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
+
+/* ===== reduced motion (global rule; every later animation must respect it) ===== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
