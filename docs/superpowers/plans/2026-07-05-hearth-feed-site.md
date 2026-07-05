@@ -352,7 +352,7 @@ def sanitize_html(raw):
     s = Sanitizer()
     s.feed(raw)
     out = "".join(s.out)
-    out = out.replace(" ", " ")
+    out = out.replace("\xa0", " ")  # NBSP from &nbsp; entities
     out = re.sub(r"<p>(\s|<br>)*</p>", "", out)   # empty paragraphs
     out = re.sub(r"\s+", " ", out)
     out = re.sub(r"\s*(</?(?:p|blockquote|ul|ol|li|h2|h3|h4)>)\s*", r"\1", out)
@@ -614,8 +614,7 @@ test("anotherCurrent prefers shared moods then date proximity", () => {
     { slug: "d", moods: ["cosmic"],        published: "2026-01-02T00:00:00Z" },
   ];
   assert.equal(lib.anotherCurrent("a", posts).slug, "c"); // 2 shared moods beats b's 1
-  assert.equal(lib.anotherCurrent("d", posts), posts[0] === lib.anotherCurrent("d", posts) ? posts[0] : lib.anotherCurrent("d", posts)); // no shared moods → nearest date, which is "a"
-  assert.equal(lib.anotherCurrent("d", posts).slug, "a");
+  assert.equal(lib.anotherCurrent("d", posts).slug, "a"); // no shared moods → nearest date wins
   assert.equal(lib.anotherCurrent("x", [posts[0]]), null);
 });
 ```
