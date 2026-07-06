@@ -34,7 +34,8 @@
   function excerptOf(text, limit = 220) {
     if (text.length <= limit) return text;
     let cut = text.slice(0, limit);
-    cut = cut.slice(0, cut.lastIndexOf(" "));
+    const sp = cut.lastIndexOf(" ");
+    if (sp > 0) cut = cut.slice(0, sp);
     return cut.replace(/[,.;:]+$/, "") + "…";
   }
 

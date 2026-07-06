@@ -16,6 +16,7 @@ test("readLengthLabel tiers match python", () => {
 test("stripTags and excerptOf", () => {
   assert.equal(lib.stripTags("<p>a  <em>b</em></p>"), "a b");
   assert.equal(lib.excerptOf("alpha beta gamma delta", 15), "alpha beta…");
+  assert.equal(lib.excerptOf("a".repeat(30), 15), "a".repeat(15) + "…");
 });
 
 test("escapeHtml", () => {
