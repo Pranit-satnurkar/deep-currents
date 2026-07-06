@@ -52,14 +52,13 @@
       "M72 24 L64 46",
       "M60 32 L54 48",
     ]),
-    // small heart behind a neat brick wall with one brick missing
+    // small heart behind a neat brick wall with one brick missing (heart peeks through the gap)
     "walled-heart": v([
-      "M60 42 C56 34 46 34 46 43 C46 51 60 58 60 58 C60 58 74 51 74 43 C74 34 64 34 60 42",
-      "M26 60 L50 60 M70 60 L94 60",
-      "M26 74 L94 74",
-      "M26 90 L94 90",
-      "M38 60 L38 74 M50 60 L50 74 M70 60 L70 74 M82 60 L82 74",
-      "M32 74 L32 90 M54 74 L54 90 M76 74 L76 90",
+      "M60 46 C57 39 48 39 48 47 C48 55 60 63 60 63 C60 63 72 55 72 47 C72 39 63 39 60 46",
+      "M26 40 L50 40 M72 40 L94 40 M26 58 L94 58 M26 76 L94 76 M26 94 L94 94",
+      "M38 40 L38 58 M84 40 L84 58",
+      "M32 58 L32 76 M54 58 L54 76 M76 58 L76 76",
+      "M44 76 L44 94 M66 76 L66 94",
     ]),
     // tiny boat on long swells, deliberately no horizon line
     "boat-adrift": v([
@@ -211,12 +210,13 @@
       "M52 56 C68 46 84 40 100 40",
       "M100 40 a3.5 3.5 0 1 0 0.1 0",
     ]),
-    // mobius band with a tiny figure walking its surface
+    // mobius band with a tiny figure walking its surface (infinity ribbon, twist at the crossing)
     "mobius-strip": v([
-      "M34 72 C18 60 22 44 40 46 C58 48 62 66 80 66 C98 66 100 48 84 44",
-      "M40 80 C22 68 26 48 42 52 C58 56 60 74 80 72 C96 70 98 52 84 50",
-      "M45 44 a3 3 0 1 0 0.1 0",
-      "M45 50 L45 60 M45 53 L40 58 M45 53 L50 58 M45 60 L41 68 M45 60 L49 68",
+      "M60 60 C48 46 26 46 26 60 C26 74 48 74 60 60 C72 46 94 46 94 60 C94 74 72 74 60 60",
+      "M60 60 C50 50 32 50 32 60 C32 70 50 70 60 60 C70 50 88 50 88 60 C88 70 70 70 60 60",
+      "M55 55 L65 65 M65 55 L55 65",
+      "M79 42 a3 3 0 1 0 0.1 0",
+      "M79 48 L79 56 M79 51 L75 55 M79 51 L83 55 M79 56 L76 62 M79 56 L82 62",
     ]),
     // head in profile, a flower and a weed sprouting from it, tiny shears
     "mind-garden": v([
