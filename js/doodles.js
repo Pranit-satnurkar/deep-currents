@@ -79,11 +79,11 @@
     ]),
     // two hands reaching toward each other, dotted line across the small gap
     "almost-touch": v([
-      "M18 78 C34 74 46 71 54 65 C58 63 58 58 55 57",
-      "M102 78 C86 74 74 71 66 65 C62 63 62 58 65 57",
-      "M57 60 a1.2 1.2 0 1 0 0.1 0",
-      "M60.5 60 a1.2 1.2 0 1 0 0.1 0",
-      "M64 60 a1.2 1.2 0 1 0 0.1 0",
+      "M12 90 C22 84 31 80 37 78 C39 72 44 71 43 76 C47 73 50 70 53 68 C51 72 50 74 48 76 C51 74 54 72 56 71 C54 75 52 77 49 79 C45 83 41 86 38 88",
+      "M10 100 C21 94 30 90 38 88",
+      "M108 30 C98 36 89 40 83 42 C81 48 76 49 77 44 C73 47 70 50 67 52 C69 48 70 46 72 44 C69 46 66 48 64 49 C66 45 68 43 71 41 C75 37 79 34 82 32",
+      "M110 20 C99 26 90 30 82 32",
+      "M57 64 a1.2 1.2 0 1 0 0.1 0 M60.5 60.5 a1.2 1.2 0 1 0 0.1 0 M64 57 a1.2 1.2 0 1 0 0.1 0",
     ]),
     // suitcase alone on a platform edge, motion lines of a departed train
     "platform-goodbye": v([
@@ -149,13 +149,13 @@
       "M67 68 C66 78 70 81 69 89",
       "M80 68 C79 76 83 78 82 85",
     ]),
-    // flat horizon, shimmer squiggles, faint upside-down oasis reflection
+    // flat horizon, shimmer squiggles, faint upside-down oasis (palm) reflection below
     "heat-mirage": v([
-      "M16 62 L104 62",
-      "M26 54 q6 -4 12 0 q6 4 12 0 q6 -4 12 0 q6 4 12 0",
-      "M26 70 q6 4 12 0 q6 -4 12 0 q6 4 12 0 q6 -4 12 0",
-      "M80 40 L80 62 M80 48 C74 44 70 46 68 50 M80 48 C86 44 90 46 92 50",
-      "M80 84 L80 62 M80 76 C74 80 70 78 68 74 M80 76 C86 80 90 78 92 74",
+      "M14 63 C38 61 72 66 106 62",
+      "M26 50 q6 -4 12 0 q6 4 12 0 q6 -4 12 0",
+      "M44 38 q6 -4 12 0 q6 4 12 0",
+      "M80 64 C79 72 81 80 79 86",
+      "M79 86 C71 90 62 91 54 87 M79 86 C74 94 68 99 60 101 M79 86 C87 90 96 91 104 87 M79 86 C84 94 90 99 98 101",
     ]),
     // eye at center, mirrored shards radiating outward
     "kaleidoscope": v([
