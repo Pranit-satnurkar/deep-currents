@@ -55,6 +55,11 @@ img { max-width: 100%; height: auto; }
 
 main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
 
+/* ===== doodles ===== */
+.doodle { color: var(--ember); width: 72px; height: 72px; }
+.doodle path { transition: stroke-dashoffset 1.4s ease-out; }
+.doodle.lit path { stroke-dashoffset: 0 !important; }
+
 /* ===== reduced motion (global rule; every later animation must respect it) ===== */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -1,0 +1,19 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>doodle gallery (dev)</title><link rel="stylesheet" href="css/hearth.css">
+<style>.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:1rem;padding:1rem}
+.g figure{text-align:center}.g figcaption{font:0.6rem/1.4 var(--font-label);color:var(--parchment-dim)}
+.doodle{width:96px;height:96px}</style>
+</head><body>
+<button onclick="igniteDoodles(document.body)" style="margin:1rem">ignite all</button>
+<div class="g" id="g"></div>
+<script src="js/doodles.js"></script>
+<script>
+  document.getElementById("g").innerHTML = Object.keys(DOODLES).map(id =>
+    `<figure>${doodleSvg(id)}<figcaption>${id}</figcaption></figure>`).join("");
+  // ?plain=1 skips the draw-on animation so headless screenshots show doodles fully drawn.
+  if (new URLSearchParams(location.search).get("plain") === "1") {
+    document.querySelectorAll("svg.doodle").forEach(s => s.classList.add("lit"));
+  }
+</script>
+</body></html>
