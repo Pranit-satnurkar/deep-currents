@@ -73,7 +73,8 @@ function renderRail() {
   ).join("");
   el.querySelectorAll(".rail-seg").forEach(b => b.onclick = () => {
     const card = view.querySelector(`.card[data-year="${b.dataset.year}"]`);
-    if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (card) card.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   });
 }
 
