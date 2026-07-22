@@ -21,6 +21,8 @@ const App = { posts: [], moods: {}, filter: null };
 const L = HearthLib;
 const view = document.getElementById("view");
 
+function renderHeaderFlame() {} // Task 8 replaces this with a lit/flicker header flame
+
 function keptSlugs() { return Store.get("hearth.kept", []); }
 function isKept(slug) { return keptSlugs().includes(slug); }
 function toggleKept(slug) {
@@ -103,6 +105,81 @@ function renderFeed() {
   watchFeed();
 }
 
+/* ---------- reader ---------- */
+function renderReader(post) {
+  document.getElementById("rail").hidden = true;
+  document.getElementById("chips").hidden = true;
+  const next = L.anotherCurrent(post.slug, App.posts);
+  const size = Store.get("hearth.textsize", 1);
+  view.innerHTML = `
+  <div class="reader" data-size="${size}">
+    <div class="reader-progress"><span id="emberBar"></span></div>
+    <p class="reader-top"><a href="#/">&larr; back to the fire</a>
+      <span class="sizer">
+        <button data-s="0" aria-label="small text">A</button><button data-s="1" aria-label="medium text">A</button><button data-s="2" aria-label="large text">A</button>
+      </span></p>
+    <div class="reader-doodle">${doodleSvg(post.doodle)}</div>
+    <h1 class="reader-title">${L.escapeHtml(post.title)}</h1>
+    <p class="reader-meta">${L.formatDate(post.published)} · ${post.readLength}</p>
+    <div class="essay">${post.html}</div>
+    <div class="reader-foot">
+      <button class="keep${isKept(post.slug) ? " kept" : ""}" id="keepBtn">
+        ${isKept(post.slug) ? "kept by the fire" : "keep by the fire"}</button>
+      <p class="canonical"><a href="${post.url}" rel="canonical noopener" target="_blank">this essay also lives at Deep Currents on Blogger</a></p>
+      ${next ? `<div class="another"><h3>another current</h3>${cardHtml(next)}</div>` : ""}
+    </div>
+  </div>`;
+  window.scrollTo(0, 0);
+  igniteDoodles(view.querySelector(".reader-doodle"));
+
+  const readerEl = view.querySelector(".reader");
+  view.querySelectorAll(".sizer button").forEach(b => b.onclick = () => {
+    Store.set("hearth.textsize", Number(b.dataset.s));
+    readerEl.dataset.size = b.dataset.s;
+  });
+
+  document.getElementById("keepBtn").onclick = (ev) => {
+    toggleKept(post.slug);
+    ev.target.classList.toggle("kept", isKept(post.slug));
+    ev.target.textContent = isKept(post.slug) ? "kept by the fire" : "keep by the fire";
+    renderHeaderFlame(); // Task 8 gives this a real body; stub above keeps this call safe
+  };
+
+  // ember progress + resume tracking
+  const bar = document.getElementById("emberBar");
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const ratio = max > 0 ? Math.min(1, scrollY / max) : 1;
+      bar.style.width = (ratio * 100) + "%";
+      Store.set("hearth.resume", ratio > 0.97 ? null : { slug: post.slug, ratio });
+    });
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  const stop = () => {
+    window.removeEventListener("scroll", onScroll);
+    document.removeEventListener("click", onNavClick, true);
+    window.removeEventListener("hashchange", stop);
+  };
+  // With `html { scroll-behavior: smooth }` active, clicking any in-app link (back link,
+  // "another current" card, nav) makes the browser smooth-scroll this still-mounted reader
+  // to the top of the fragment *before* location.hash updates and hashchange fires — which
+  // would otherwise feed a stream of spurious scroll events into onScroll and overwrite the
+  // real resume ratio with 0. Detach eagerly, in the click capture phase, ahead of that.
+  const onNavClick = (ev) => { if (ev.target.closest("a[href^='#']")) stop(); };
+  document.addEventListener("click", onNavClick, true);
+  window.addEventListener("hashchange", stop);
+  const r = Store.get("hearth.resume", null);
+  if (r && r.slug === post.slug && r.ratio > 0.02) {
+    requestAnimationFrame(() =>
+      window.scrollTo(0, r.ratio * (document.documentElement.scrollHeight - innerHeight)));
+  }
+}
+
 /* ---------- router ---------- */
 function render() {
   const h = location.hash.replace(/^#\/?/, "");
@@ -110,7 +187,7 @@ function render() {
   if (!h) return renderFeed();
   if (h === "kept" || h === "about") return renderFeed();   // Task 8 replaces
   const post = App.posts.find(p => p.slug === h);
-  return post ? renderFeed() : renderFeed();                 // Task 7 replaces with renderReader(post)
+  return post ? renderReader(post) : renderFeed();
 }
 
 /* ---------- boot ---------- */

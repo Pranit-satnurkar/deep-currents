@@ -78,6 +78,7 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
 .chip-static { pointer-events: none; font-size: 0.62rem; padding: 0.15rem 0.55rem; }
 
 /* ===== ember rail ===== */
+#rail[hidden], #chips[hidden] { display: none; } /* id+attribute outweighs .ember-rail/.mood-chips display:flex */
 .ember-rail { position: sticky; top: 0; z-index: 5; display: flex; gap: 0.4rem;
   justify-content: center; padding: 0.35rem 1.1rem;
   background: color-mix(in srgb, var(--ink-deep) 82%, transparent); backdrop-filter: blur(6px); }
@@ -112,3 +113,43 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
   border-radius: 12px; color: var(--parchment-dim); font-size: 0.9rem; }
 .resume-card em { color: var(--ember); font-style: italic; }
 .resume-flame .doodle { width: 26px; height: 30px; }
+
+/* ===== reader ===== */
+.reader { padding-top: 0.5rem; }
+.reader-progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 10;
+  background: color-mix(in srgb, var(--ember) 12%, transparent); }
+#emberBar { display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--ember), var(--ember-bright));
+  box-shadow: 0 0 8px var(--ember); }
+.reader-top { display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-label); font-size: 0.78rem; margin: 0.8rem 0 1.4rem; }
+.sizer button { background: none; border: 1px solid color-mix(in srgb, var(--dusty) 35%, transparent);
+  color: var(--dusty); border-radius: 6px; cursor: pointer; margin-left: 0.3rem;
+  font-family: var(--font-body); line-height: 1; padding: 0.25rem 0.45rem; }
+.sizer button:nth-child(1) { font-size: 0.7rem; }
+.sizer button:nth-child(2) { font-size: 0.85rem; }
+.sizer button:nth-child(3) { font-size: 1rem; }
+.reader-doodle .doodle { width: 84px; height: 84px; }
+.reader-title { font-family: var(--font-display); font-weight: 600; font-size: 1.7rem;
+  line-height: 1.25; margin: 0.6rem 0 0.3rem; }
+.reader-meta { font-family: var(--font-label); font-size: 0.7rem; color: var(--dusty);
+  letter-spacing: 0.05em; margin-bottom: 1.6rem; }
+.essay { max-width: 65ch; }
+.essay p { margin-bottom: 1.15em; }
+.essay blockquote { border-left: 2px solid var(--ember); padding-left: 1rem;
+  color: var(--parchment-dim); font-style: italic; margin: 1.2em 0; }
+.reader[data-size="0"] .essay { font-size: 1rem; }
+.reader[data-size="1"] .essay { font-size: 1.08rem; }
+.reader[data-size="2"] .essay { font-size: 1.18rem; }
+.reader-foot { margin-top: 2.5rem; border-top: 1px solid color-mix(in srgb, var(--ember) 15%, transparent);
+  padding-top: 1.4rem; }
+.keep { font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.04em;
+  color: var(--ember); background: none; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ember) 50%, transparent);
+  border-radius: 999px; padding: 0.5rem 1.1rem; transition: background 0.3s, color 0.3s; }
+.keep.kept { background: var(--ember); color: var(--ink-deep); }
+.canonical { margin: 1rem 0 1.8rem; font-size: 0.8rem; }
+.another h3 { font-family: var(--font-label); font-size: 0.7rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--dusty); margin-bottom: 0.6rem; }
+.another .card { border-color: color-mix(in srgb, var(--ember) 35%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--ember) 12%, transparent); }
