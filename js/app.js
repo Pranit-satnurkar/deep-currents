@@ -224,6 +224,51 @@ function render() {
   return post ? renderReader(post) : renderFeed();
 }
 
+/* ---------- live refresh ---------- */
+function liveRefresh() {
+  window.__hearthFeed = (data) => {
+    try {
+      const known = new Set(App.posts.map(p => p.id));
+      const entries = (data.feed && data.feed.entry) || [];
+      const fresh = [];
+      for (const e of entries) {
+        const m = /\.post-(\d+)$/.exec(e.id.$t);
+        const id = m ? m[1] : e.id.$t;
+        if (known.has(id)) continue;
+        const title = e.title.$t.trim();
+        const raw = (e.content && e.content.$t) || "";
+        const text = L.stripTags(raw);
+        fresh.push({
+          id, fresh: true,
+          slug: title.toLowerCase().normalize("NFKD").replace(/['‘’]/g, "")
+                 .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48),
+          title,
+          published: e.published.$t,
+          url: (e.link.find(l => l.rel === "alternate") || {}).href || "",
+          words: text.split(/\s+/).length,
+          readLength: L.readLengthLabel(text.split(/\s+/).length),
+          excerpt: L.excerptOf(text),
+          moods: L.guessMoods(title, text),
+          doodle: "young-flame",
+          html: text.split(/\n\n+/).map(t => `<p>${L.escapeHtml(t)}</p>`).join("") ||
+                `<p>${L.escapeHtml(text)}</p>`,
+        });
+      }
+      if (!fresh.length) return;
+      App.posts = [...fresh, ...App.posts]
+        .sort((a, b) => b.published.localeCompare(a.published));
+      const onFeed = !location.hash.replace(/^#\/?/, "");
+      if (onFeed && scrollY < 200) { renderRail(); render(); }
+    } catch (err) { /* silent by design */ }
+  };
+  const s = document.createElement("script");
+  s.src = "https://deepcurrentswrites.blogspot.com/feeds/posts/default"
+        + "?alt=json-in-script&max-results=12&callback=__hearthFeed";
+  s.async = true;
+  s.onerror = () => s.remove();
+  document.head.appendChild(s);
+}
+
 /* ---------- boot ---------- */
 async function boot() {
   const data = await (await fetch("data/posts.json")).json();
@@ -232,5 +277,6 @@ async function boot() {
   renderHeaderFlame();
   renderChips(); renderRail(); render();
   window.addEventListener("hashchange", render);
+  liveRefresh();
 }
 boot();
