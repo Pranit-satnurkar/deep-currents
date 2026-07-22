@@ -158,7 +158,7 @@ function renderReader(post) {
     <div class="reader-foot">
       <button class="keep${isKept(post.slug) ? " kept" : ""}" id="keepBtn">
         ${isKept(post.slug) ? "kept by the fire" : "keep by the fire"}</button>
-      <p class="canonical"><a href="${post.url}" rel="canonical noopener" target="_blank">this essay also lives at Deep Currents on Blogger</a></p>
+      <p class="canonical"><a href="${L.escapeHtml(post.url)}" rel="canonical noopener" target="_blank">this essay also lives at Deep Currents on Blogger</a></p>
       ${next ? `<div class="another"><h3>another current</h3>${cardHtml(next)}</div>` : ""}
     </div>
   </div>`;
@@ -232,27 +232,35 @@ function liveRefresh() {
       const entries = (data.feed && data.feed.entry) || [];
       const fresh = [];
       for (const e of entries) {
-        const m = /\.post-(\d+)$/.exec(e.id.$t);
-        const id = m ? m[1] : e.id.$t;
-        if (known.has(id)) continue;
-        const title = e.title.$t.trim();
-        const raw = (e.content && e.content.$t) || "";
-        const text = L.stripTags(raw);
-        fresh.push({
-          id, fresh: true,
-          slug: title.toLowerCase().normalize("NFKD").replace(/['‘’]/g, "")
-                 .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48),
-          title,
-          published: e.published.$t,
-          url: (e.link.find(l => l.rel === "alternate") || {}).href || "",
-          words: text.split(/\s+/).length,
-          readLength: L.readLengthLabel(text.split(/\s+/).length),
-          excerpt: L.excerptOf(text),
-          moods: L.guessMoods(title, text),
-          doodle: "young-flame",
-          html: text.split(/\n\n+/).map(t => `<p>${L.escapeHtml(t)}</p>`).join("") ||
-                `<p>${L.escapeHtml(text)}</p>`,
-        });
+        try {
+          const m = /\.post-(\d+)$/.exec(e.id.$t);
+          const id = m ? m[1] : e.id.$t;
+          if (known.has(id)) continue;
+          const title = e.title.$t.trim();
+          const raw = (e.content && e.content.$t) || "";
+          const text = L.stripTags(raw);
+          const href = (e.link.find(l => l.rel === "alternate") || {}).href || "";
+          let url = "";
+          try {
+            const parsed = new URL(href, location.href);
+            if (parsed.protocol === "http:" || parsed.protocol === "https:") url = href;
+          } catch (err) { /* leave url as "" */ }
+          fresh.push({
+            id, fresh: true,
+            slug: title.toLowerCase().normalize("NFKD").replace(/['‘’]/g, "")
+                   .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48),
+            title,
+            published: e.published.$t,
+            url,
+            words: text.split(/\s+/).length,
+            readLength: L.readLengthLabel(text.split(/\s+/).length),
+            excerpt: L.excerptOf(text),
+            moods: L.guessMoods(title, text),
+            doodle: "young-flame",
+            html: text.split(/\n\n+/).map(t => `<p>${L.escapeHtml(t)}</p>`).join("") ||
+                  `<p>${L.escapeHtml(text)}</p>`,
+          });
+        } catch (err) { continue; }
       }
       if (!fresh.length) return;
       App.posts = [...fresh, ...App.posts]
