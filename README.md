@@ -21,6 +21,9 @@ and push.
 
     python -m unittest discover tests -v   # content pipeline
     node --test tests/                     # JS logic + doodle registry
+                                            # (if your Node/OS doesn't resolve
+                                            # the directory form, run:
+                                            # node --test tests/*.test.mjs)
 
 ## Dev pages
 
