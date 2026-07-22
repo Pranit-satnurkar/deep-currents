@@ -21,7 +21,13 @@ const App = { posts: [], moods: {}, filter: null };
 const L = HearthLib;
 const view = document.getElementById("view");
 
-function renderHeaderFlame() {} // Task 8 replaces this with a lit/flicker header flame
+function renderHeaderFlame() {
+  const el = document.getElementById("headerFlame");
+  const grow = 1 + Math.min(keptSlugs().length, 12) * 0.02;
+  el.innerHTML = doodleSvg("hearth-flame", "flame");
+  el.style.transform = `scale(${grow})`;
+  igniteDoodles(el.parentElement);
+}
 
 function keptSlugs() { return Store.get("hearth.kept", []); }
 function isKept(slug) { return keptSlugs().includes(slug); }
@@ -105,6 +111,33 @@ function renderFeed() {
   watchFeed();
 }
 
+/* ---------- kept shelf ---------- */
+function renderKept() {
+  document.getElementById("rail").hidden = true;
+  document.getElementById("chips").hidden = true;
+  const kept = App.posts.filter(p => keptSlugs().includes(p.slug));
+  view.innerHTML = `<h1 class="page-title">kept by the fire</h1>` + (kept.length
+    ? `<div class="feed">${kept.map(cardHtml).join("")}</div>`
+    : `<p class="empty">nothing kept yet — essays you keep will wait for you here, warm.</p>`);
+  watchFeed();
+}
+
+/* ---------- about ---------- */
+function renderAbout() {
+  document.getElementById("rail").hidden = true;
+  document.getElementById("chips").hidden = true;
+  view.innerHTML = `<div class="about">
+    <div class="about-doodle">${doodleSvg("scribbler-quill")}</div>
+    <h1 class="page-title">Scribbler</h1>
+    <p>I write from the deep hours — the 3 a.m. questions, the strangers on trains,
+    the rain we secretly crave. Deep Currents is where I set those thoughts down:
+    small essays on solitude, purpose, and the quiet mechanics of being a person.</p>
+    <p>If one of them keeps you company for a night, it has done its work.</p>
+    <p class="canonical"><a href="https://deepcurrentswrites.blogspot.com/" rel="noopener" target="_blank">Deep Currents began on Blogger — the archive lives there too.</a></p>
+  </div>`;
+  igniteDoodles(view);
+}
+
 /* ---------- reader ---------- */
 function renderReader(post) {
   document.getElementById("rail").hidden = true;
@@ -142,7 +175,7 @@ function renderReader(post) {
     toggleKept(post.slug);
     ev.target.classList.toggle("kept", isKept(post.slug));
     ev.target.textContent = isKept(post.slug) ? "kept by the fire" : "keep by the fire";
-    renderHeaderFlame(); // Task 8 gives this a real body; stub above keeps this call safe
+    renderHeaderFlame();
   };
 
   // ember progress + resume tracking
@@ -185,7 +218,8 @@ function render() {
   const h = location.hash.replace(/^#\/?/, "");
   if (feedObserver) feedObserver.disconnect();
   if (!h) return renderFeed();
-  if (h === "kept" || h === "about") return renderFeed();   // Task 8 replaces
+  if (h === "kept") return renderKept();
+  if (h === "about") return renderAbout();
   const post = App.posts.find(p => p.slug === h);
   return post ? renderReader(post) : renderFeed();
 }
@@ -195,8 +229,7 @@ async function boot() {
   const data = await (await fetch("data/posts.json")).json();
   App.posts = data.posts;
   App.moods = data.moods;
-  document.getElementById("headerFlame").innerHTML = doodleSvg("hearth-flame", "flame");
-  igniteDoodles(document.querySelector(".hearth-header"));
+  renderHeaderFlame();
   renderChips(); renderRail(); render();
   window.addEventListener("hashchange", render);
 }
