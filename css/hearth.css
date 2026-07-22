@@ -1,0 +1,180 @@
+/* ===== fonts (self-hosted) ===== */
+@font-face { font-family: "Fraunces"; src: url("../fonts/fraunces-v38-latin-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("../fonts/fraunces-v38-latin-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("../fonts/fraunces-v38-latin-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Literata"; src: url("../fonts/literata-v40-latin-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Literata"; src: url("../fonts/literata-v40-latin-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Literata"; src: url("../fonts/literata-v40-latin-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("../fonts/inter-v20-latin-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("../fonts/inter-v20-latin-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+
+/* ===== tokens ===== */
+:root {
+  --ink: #171020;          /* deep plum-ink page ground */
+  --ink-deep: #100a18;     /* deeper wells: header, reader backdrop */
+  --ink-glow: #241732;     /* faint warm glow at top of page */
+  --card: #211830;         /* card surface */
+  --parchment: #f0e7d8;    /* primary text */
+  --parchment-dim: #b9aea6;/* secondary text */
+  --ember: #e8a04c;        /* warm ember-gold accent */
+  --ember-bright: #ffc46b; /* lit/hover states */
+  --dusty: #8fa3c7;        /* dusty blue secondary details */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Literata", Georgia, serif;
+  --font-label: "Inter", system-ui, sans-serif;
+}
+
+/* ===== base ===== */
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: radial-gradient(120% 80% at 50% -10%, var(--ink-glow) 0%, var(--ink) 55%) fixed var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--ember); text-decoration: none; }
+a:hover, a:focus-visible { color: var(--ember-bright); }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 2px; }
+img { max-width: 100%; height: auto; }
+
+/* ===== header ===== */
+.hearth-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.1rem 0.6rem;
+  max-width: 46rem; margin: 0 auto;
+}
+.brand { display: flex; align-items: center; gap: 0.65rem; color: var(--parchment); }
+.brand-name { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; display: block; letter-spacing: 0.01em; }
+.brand-tag { font-family: var(--font-label); font-size: 0.68rem; color: var(--parchment-dim); letter-spacing: 0.06em; display: block; }
+#headerFlame { width: 34px; height: 42px; display: inline-block; }
+.hearth-nav { display: flex; gap: 1rem; font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.04em; }
+.hearth-nav a { color: var(--parchment-dim); }
+.hearth-nav a:hover { color: var(--ember); }
+
+main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
+
+/* ===== doodles ===== */
+.doodle { color: var(--ember); width: 72px; height: 72px; }
+.doodle path { transition: stroke-dashoffset 1.4s ease-out; }
+.doodle.lit path { stroke-dashoffset: 0 !important; }
+
+/* ===== reduced motion (global rule; every later animation must respect it) ===== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ===== mood chips ===== */
+.mood-chips { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.4rem 1.1rem 0.8rem;
+  max-width: 46rem; margin: 0 auto; scrollbar-width: none; }
+.mood-chips::-webkit-scrollbar { display: none; }
+.chip { font-family: var(--font-label); font-size: 0.72rem; letter-spacing: 0.03em;
+  color: var(--dusty); background: none; border: 1px solid color-mix(in srgb, var(--dusty) 35%, transparent);
+  border-radius: 999px; padding: 0.3rem 0.8rem; white-space: nowrap; cursor: pointer;
+  transition: color 0.25s, border-color 0.25s, background 0.25s; }
+.chip.on { color: var(--ink-deep); background: var(--ember); border-color: var(--ember); }
+.chip-static { pointer-events: none; font-size: 0.62rem; padding: 0.15rem 0.55rem; }
+/* interactive filter chips need a real tap target; the decorative .chip-static tags in
+   card-moods are pointer-events:none and stay compact */
+#chips .chip { min-height: 40px; display: inline-flex; align-items: center; }
+
+/* ===== ember rail ===== */
+#rail[hidden], #chips[hidden] { display: none; } /* id+attribute outweighs .ember-rail/.mood-chips display:flex */
+.ember-rail { position: sticky; top: 0; z-index: 5; display: flex; gap: 0.4rem;
+  justify-content: center; padding: 0.35rem 1.1rem;
+  background: color-mix(in srgb, var(--ink-deep) 82%, transparent); backdrop-filter: blur(6px); }
+.rail-seg { background: none; border: 0; cursor: pointer; display: grid; gap: 2px;
+  justify-items: center; align-content: center; padding: 0.2rem 0.4rem; min-height: 40px; min-width: 40px; }
+.rail-seg span { width: 44px; height: 3px; border-radius: 2px;
+  background: color-mix(in srgb, var(--ember) 25%, transparent); transition: background 0.4s, box-shadow 0.4s; }
+.rail-seg small { font-family: var(--font-label); font-size: 0.58rem; color: var(--parchment-dim); }
+.rail-seg.glow span { background: var(--ember-bright); box-shadow: 0 0 8px var(--ember); }
+
+/* ===== feed cards ===== */
+.feed { display: grid; gap: 1.1rem; padding-top: 0.8rem; scroll-snap-type: y proximity; }
+.card { scroll-snap-align: start; scroll-margin-top: 3.2rem; background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--ember) 12%, transparent);
+  border-radius: 14px; transition: border-color 0.4s, transform 0.4s; }
+.card:hover { border-color: color-mix(in srgb, var(--ember) 40%, transparent); transform: translateY(-2px); }
+.card-link { display: block; color: inherit; padding: 1.2rem 1.2rem 1.1rem; }
+.card-doodle { margin-bottom: 0.5rem; }
+.card-title { font-family: var(--font-display); font-weight: 600; font-size: 1.22rem;
+  line-height: 1.3; color: var(--parchment); }
+.card-meta { font-family: var(--font-label); font-size: 0.68rem; color: var(--dusty);
+  letter-spacing: 0.05em; margin: 0.4rem 0 0.55rem; }
+.card-excerpt { color: var(--parchment-dim); font-size: 0.92rem;
+  -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
+.card-moods { display: flex; gap: 0.4rem; margin-top: 0.6rem; }
+.card.fresh { border-color: color-mix(in srgb, var(--ember-bright) 45%, transparent); }
+.empty { text-align: center; color: var(--dusty); font-style: italic; padding: 3rem 0; }
+
+/* ===== resume card ===== */
+.resume-card { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.8rem;
+  padding: 0.7rem 1rem; border: 1px dashed color-mix(in srgb, var(--ember) 45%, transparent);
+  border-radius: 12px; color: var(--parchment-dim); font-size: 0.9rem; }
+.resume-card em { color: var(--ember); font-style: italic; }
+.resume-flame .doodle { width: 26px; height: 30px; }
+
+/* ===== reader ===== */
+.reader { padding-top: 0.5rem; }
+.reader-progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 10;
+  background: color-mix(in srgb, var(--ember) 12%, transparent); }
+#emberBar { display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--ember), var(--ember-bright));
+  box-shadow: 0 0 8px var(--ember); }
+.reader-top { display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-label); font-size: 0.78rem; margin: 0.8rem 0 1.4rem; }
+.sizer button { background: none; border: 1px solid color-mix(in srgb, var(--dusty) 35%, transparent);
+  color: var(--dusty); border-radius: 6px; cursor: pointer; margin-left: 0.3rem;
+  font-family: var(--font-body); line-height: 1; padding: 0.25rem 0.45rem;
+  min-width: 40px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+.sizer button:nth-child(1) { font-size: 0.7rem; }
+.sizer button:nth-child(2) { font-size: 0.85rem; }
+.sizer button:nth-child(3) { font-size: 1rem; }
+.reader-doodle .doodle { width: 84px; height: 84px; }
+.reader-title { font-family: var(--font-display); font-weight: 600; font-size: 1.7rem;
+  line-height: 1.25; margin: 0.6rem 0 0.3rem; }
+.reader-meta { font-family: var(--font-label); font-size: 0.7rem; color: var(--dusty);
+  letter-spacing: 0.05em; margin-bottom: 1.6rem; }
+.essay { max-width: 65ch; }
+.essay p { margin-bottom: 1.15em; }
+.essay blockquote { border-left: 2px solid var(--ember); padding-left: 1rem;
+  color: var(--parchment-dim); font-style: italic; margin: 1.2em 0; }
+.reader[data-size="0"] .essay { font-size: 1rem; }
+.reader[data-size="1"] .essay { font-size: 1.08rem; }
+.reader[data-size="2"] .essay { font-size: 1.18rem; }
+.reader-foot { margin-top: 2.5rem; border-top: 1px solid color-mix(in srgb, var(--ember) 15%, transparent);
+  padding-top: 1.4rem; }
+.keep { font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.04em;
+  color: var(--ember); background: none; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ember) 50%, transparent);
+  border-radius: 999px; padding: 0.5rem 1.1rem; transition: background 0.3s, color 0.3s;
+  min-height: 40px; display: inline-flex; align-items: center; }
+.keep.kept { background: var(--ember); color: var(--ink-deep); }
+.canonical { margin: 1rem 0 1.8rem; font-size: 0.8rem; }
+.another h3 { font-family: var(--font-label); font-size: 0.7rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--dusty); margin-bottom: 0.6rem; }
+.another .card { border-color: color-mix(in srgb, var(--ember) 35%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--ember) 12%, transparent); }
+
+/* ===== kept shelf, about, header flame ===== */
+.page-title { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; margin: 1rem 0; }
+.about { max-width: 60ch; padding-top: 1rem; }
+.about p { margin-bottom: 1em; color: var(--parchment-dim); }
+.about-doodle .doodle { width: 84px; height: 84px; }
+#headerFlame { transform-origin: bottom center; transition: transform 0.6s; }
+#headerFlame .doodle { width: 100%; height: 100%; animation: flicker 2.8s ease-in-out infinite; }
+@keyframes flicker {
+  0%, 100% { transform: scaleY(1) rotate(0deg); opacity: 1; }
+  30%      { transform: scaleY(1.05) rotate(-1.2deg); opacity: 0.92; }
+  55%      { transform: scaleY(0.97) rotate(0.8deg); opacity: 1; }
+  80%      { transform: scaleY(1.03) rotate(-0.5deg); opacity: 0.95; }
+}
+
+/* ===== tablet type-scale ===== */
+@media (min-width: 700px) {
+  .card-title { font-size: 1.35rem; }
+  .reader-title { font-size: 2rem; }
+}
