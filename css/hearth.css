@@ -76,6 +76,9 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
   transition: color 0.25s, border-color 0.25s, background 0.25s; }
 .chip.on { color: var(--ink-deep); background: var(--ember); border-color: var(--ember); }
 .chip-static { pointer-events: none; font-size: 0.62rem; padding: 0.15rem 0.55rem; }
+/* interactive filter chips need a real tap target; the decorative .chip-static tags in
+   card-moods are pointer-events:none and stay compact */
+#chips .chip { min-height: 40px; display: inline-flex; align-items: center; }
 
 /* ===== ember rail ===== */
 #rail[hidden], #chips[hidden] { display: none; } /* id+attribute outweighs .ember-rail/.mood-chips display:flex */
@@ -83,7 +86,7 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
   justify-content: center; padding: 0.35rem 1.1rem;
   background: color-mix(in srgb, var(--ink-deep) 82%, transparent); backdrop-filter: blur(6px); }
 .rail-seg { background: none; border: 0; cursor: pointer; display: grid; gap: 2px;
-  justify-items: center; padding: 0.2rem 0.4rem; }
+  justify-items: center; align-content: center; padding: 0.2rem 0.4rem; min-height: 40px; min-width: 40px; }
 .rail-seg span { width: 44px; height: 3px; border-radius: 2px;
   background: color-mix(in srgb, var(--ember) 25%, transparent); transition: background 0.4s, box-shadow 0.4s; }
 .rail-seg small { font-family: var(--font-label); font-size: 0.58rem; color: var(--parchment-dim); }
@@ -125,7 +128,8 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
   font-family: var(--font-label); font-size: 0.78rem; margin: 0.8rem 0 1.4rem; }
 .sizer button { background: none; border: 1px solid color-mix(in srgb, var(--dusty) 35%, transparent);
   color: var(--dusty); border-radius: 6px; cursor: pointer; margin-left: 0.3rem;
-  font-family: var(--font-body); line-height: 1; padding: 0.25rem 0.45rem; }
+  font-family: var(--font-body); line-height: 1; padding: 0.25rem 0.45rem;
+  min-width: 40px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
 .sizer button:nth-child(1) { font-size: 0.7rem; }
 .sizer button:nth-child(2) { font-size: 0.85rem; }
 .sizer button:nth-child(3) { font-size: 1rem; }
@@ -146,7 +150,8 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
 .keep { font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.04em;
   color: var(--ember); background: none; cursor: pointer;
   border: 1px solid color-mix(in srgb, var(--ember) 50%, transparent);
-  border-radius: 999px; padding: 0.5rem 1.1rem; transition: background 0.3s, color 0.3s; }
+  border-radius: 999px; padding: 0.5rem 1.1rem; transition: background 0.3s, color 0.3s;
+  min-height: 40px; display: inline-flex; align-items: center; }
 .keep.kept { background: var(--ember); color: var(--ink-deep); }
 .canonical { margin: 1rem 0 1.8rem; font-size: 0.8rem; }
 .another h3 { font-family: var(--font-label); font-size: 0.7rem; letter-spacing: 0.12em;
@@ -166,4 +171,10 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
   30%      { transform: scaleY(1.05) rotate(-1.2deg); opacity: 0.92; }
   55%      { transform: scaleY(0.97) rotate(0.8deg); opacity: 1; }
   80%      { transform: scaleY(1.03) rotate(-0.5deg); opacity: 0.95; }
+}
+
+/* ===== tablet type-scale ===== */
+@media (min-width: 700px) {
+  .card-title { font-size: 1.35rem; }
+  .reader-title { font-size: 2rem; }
 }
