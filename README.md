@@ -3,6 +3,8 @@
 A warm, candlelit, mobile-first home for the essays of
 [Deep Currents](https://deepcurrentswrites.blogspot.com/), by Scribbler.
 
+**Live site:** https://pranit-satnurkar.github.io/deep-currents/
+
 Fully static: no build step, no dependencies. Open `index.html` via any
 static server.
 
