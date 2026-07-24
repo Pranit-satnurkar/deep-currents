@@ -21,6 +21,9 @@ const App = { posts: [], moods: {}, filter: null };
 const L = HearthLib;
 const view = document.getElementById("view");
 
+const REACTIONS = ["this found me", "sat with me a while", "needed this tonight", "still thinking about it"];
+const FEEDBACK_ENDPOINT = "https://formspree.io/f/xpqvygdd";
+
 function renderHeaderFlame() {
   const el = document.getElementById("headerFlame");
   const grow = 1 + Math.min(keptSlugs().length, 12) * 0.02;
@@ -34,6 +37,31 @@ function isKept(slug) { return keptSlugs().includes(slug); }
 function toggleKept(slug) {
   const k = keptSlugs();
   Store.set("hearth.kept", k.includes(slug) ? k.filter(s => s !== slug) : [...k, slug]);
+}
+
+/* ---------- current read (bookmark) ---------- */
+function getBookmark() { return Store.get("hearth.bookmark", null); }
+function setBookmark(slug, ratio) { Store.set("hearth.bookmark", { slug, ratio }); }
+function clearBookmark() { Store.set("hearth.bookmark", null); }
+
+function currentScrollRatio() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  return max > 0 ? Math.min(1, scrollY / max) : 1;
+}
+
+/* explicit bookmark wins; ambient resume is the fallback (today's behavior) */
+function currentReadInfo() {
+  const b = getBookmark();
+  if (b) {
+    const p = App.posts.find(x => x.slug === b.slug);
+    if (p) return { post: p, source: "bookmark" };
+  }
+  const r = Store.get("hearth.resume", null);
+  if (r && r.ratio >= 0.02 && r.ratio <= 0.97) {
+    const p = App.posts.find(x => x.slug === r.slug);
+    if (p) return { post: p, source: "resume" };
+  }
+  return null;
 }
 
 /* ---------- feed ---------- */
@@ -51,15 +79,16 @@ function cardHtml(p) {
   </article>`;
 }
 
-function resumeCardHtml() {
-  const r = Store.get("hearth.resume", null);
-  if (!r) return "";
-  const p = App.posts.find(x => x.slug === r.slug);
-  if (!p || r.ratio < 0.02 || r.ratio > 0.97) return "";
-  return `<a class="resume-card" href="#/${p.slug}">
-    <span class="resume-flame">${doodleSvg("young-flame")}</span>
-    <span>still burning: <em>${L.escapeHtml(p.title)}</em></span>
-  </a>`;
+function currentReadHtml() {
+  const info = currentReadInfo();
+  if (!info) return "";
+  return `<div class="current-read">
+    <a class="resume-card" href="#/${info.post.slug}">
+      <span class="resume-flame">${doodleSvg("young-flame")}</span>
+      <span>still burning: <em>${L.escapeHtml(info.post.title)}</em></span>
+    </a>
+    <button class="dismiss-current" id="dismissCurrent" aria-label="dismiss currently reading">&times;</button>
+  </div>`;
 }
 
 function renderChips() {
@@ -105,9 +134,17 @@ function renderFeed() {
   const posts = App.filter ? App.posts.filter(p => p.moods.includes(App.filter)) : App.posts;
   document.getElementById("rail").hidden = false;
   document.getElementById("chips").hidden = false;
-  view.innerHTML = resumeCardHtml() + (posts.length
+  view.innerHTML = currentReadHtml() + (posts.length
     ? `<div class="feed">${posts.map(cardHtml).join("")}</div>`
     : `<p class="empty">no embers here tonight.</p>`);
+  const dismiss = document.getElementById("dismissCurrent");
+  if (dismiss) dismiss.onclick = (ev) => {
+    ev.preventDefault();
+    const info = currentReadInfo();
+    if (info && info.source === "bookmark") clearBookmark();
+    else Store.set("hearth.resume", null);
+    renderFeed();
+  };
   watchFeed();
 }
 
@@ -156,10 +193,22 @@ function renderReader(post) {
     <p class="reader-meta">${L.formatDate(post.published)} · ${post.readLength}</p>
     <div class="essay">${post.html}</div>
     <div class="reader-foot">
-      <button class="keep${isKept(post.slug) ? " kept" : ""}" id="keepBtn">
-        ${isKept(post.slug) ? "kept by the fire" : "keep by the fire"}</button>
+      <div class="reader-actions">
+        <button class="keep${isKept(post.slug) ? " kept" : ""}" id="keepBtn">
+          ${isKept(post.slug) ? "kept by the fire" : "keep by the fire"}</button>
+        <button class="mark-place" id="markPlaceBtn">mark my place</button>
+      </div>
       <p class="canonical"><a href="${L.escapeHtml(post.url)}" rel="canonical noopener" target="_blank">this essay also lives at Deep Currents on Blogger</a></p>
       ${next ? `<div class="another"><h3>another current</h3>${cardHtml(next)}</div>` : ""}
+      <div class="feedback" id="feedback">
+        <p class="feedback-prompt">how did this sit with you?</p>
+        <div class="feedback-reactions" role="radiogroup" aria-label="reaction">
+          ${REACTIONS.map(r => `<button type="button" class="reaction" data-r="${L.escapeHtml(r)}">${L.escapeHtml(r)}</button>`).join("")}
+        </div>
+        <textarea class="feedback-note" id="feedbackNote" placeholder="a few words, if you like..." rows="2"></textarea>
+        <p class="feedback-status" id="feedbackStatus" aria-live="polite"></p>
+        <button type="button" class="feedback-submit" id="feedbackSubmit" disabled>send it to the fire</button>
+      </div>
     </div>
   </div>`;
   window.scrollTo(0, 0);
@@ -178,6 +227,58 @@ function renderReader(post) {
     renderHeaderFlame();
   };
 
+  const markBtn = document.getElementById("markPlaceBtn");
+  markBtn.onclick = () => {
+    setBookmark(post.slug, currentScrollRatio());
+    markBtn.textContent = "place marked";
+    markBtn.classList.add("marked");
+    setTimeout(() => {
+      markBtn.textContent = "mark my place";
+      markBtn.classList.remove("marked");
+    }, 1400);
+  };
+
+  // ---------- feedback form ----------
+  const feedbackEl = document.getElementById("feedback");
+  const noteEl = document.getElementById("feedbackNote");
+  const statusEl = document.getElementById("feedbackStatus");
+  const submitEl = document.getElementById("feedbackSubmit");
+  let selectedReaction = null;
+
+  const refreshSubmitState = () => {
+    submitEl.disabled = !selectedReaction && !noteEl.value.trim();
+  };
+  feedbackEl.querySelectorAll(".reaction").forEach(btn => btn.onclick = () => {
+    const already = btn.classList.contains("on");
+    feedbackEl.querySelectorAll(".reaction").forEach(b => b.classList.remove("on"));
+    selectedReaction = already ? null : btn.dataset.r;
+    if (!already) btn.classList.add("on");
+    refreshSubmitState();
+  });
+  noteEl.addEventListener("input", refreshSubmitState);
+
+  submitEl.onclick = async () => {
+    submitEl.disabled = true;
+    statusEl.textContent = "";
+    try {
+      const res = await fetch(FEEDBACK_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          reaction: selectedReaction || "",
+          note: noteEl.value.trim(),
+          title: post.title,
+          slug: post.slug,
+        }),
+      });
+      if (!res.ok) throw new Error("bad response");
+      feedbackEl.innerHTML = `<p class="feedback-status">reached the fire — thank you.</p>`;
+    } catch (err) {
+      statusEl.textContent = "couldn't reach the fire — try again?";
+      refreshSubmitState();
+    }
+  };
+
   // ember progress + resume tracking
   const bar = document.getElementById("emberBar");
   let ticking = false;
@@ -186,10 +287,14 @@ function renderReader(post) {
     ticking = true;
     requestAnimationFrame(() => {
       ticking = false;
-      const max = document.documentElement.scrollHeight - innerHeight;
-      const ratio = max > 0 ? Math.min(1, scrollY / max) : 1;
+      const ratio = currentScrollRatio();
       bar.style.width = (ratio * 100) + "%";
       Store.set("hearth.resume", ratio > 0.97 ? null : { slug: post.slug, ratio });
+      // Only clear the bookmark once the reader has genuinely read past where they
+      // marked — not merely because the scroll settled at/near the same position
+      // (e.g. the auto-scroll that brings "mark my place" into view on tap).
+      const bm = getBookmark();
+      if (bm && bm.slug === post.slug && ratio > 0.97 && ratio > bm.ratio + 0.005) clearBookmark();
     });
   };
   window.addEventListener("scroll", onScroll, { passive: true });
