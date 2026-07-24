@@ -84,7 +84,7 @@ function cardHtml(p, extraClass = "", excerptOverride = null) {
 function featuredHtml(p) {
   const chips = p.moods.map(m =>
     `<span class="chip chip-static">${L.escapeHtml(App.moods[m] || m)}</span>`).join("");
-  const excerpt = L.excerptOf(L.stripTags(p.html), 380);
+  const excerpt = L.excerptOf(L.decodeEntities(L.stripTags(p.html)), 380);
   return `<article class="card featured" data-year="${L.yearOf(p.published)}">
     <a class="card-link" href="#/${p.slug}">
       <span class="featured-eyebrow">latest current</span>
@@ -110,7 +110,7 @@ function wordTertiles() {
 function feedCardHtml(p, tertiles, hidden = false) {
   const h = hidden ? " year-extra" : "";
   if (p.words <= tertiles.low) return cardHtml(p, " compact" + h);
-  if (p.words >= tertiles.high) return cardHtml(p, " rich" + h, L.excerptOf(L.stripTags(p.html), 320));
+  if (p.words >= tertiles.high) return cardHtml(p, " rich" + h, L.excerptOf(L.decodeEntities(L.stripTags(p.html)), 320));
   return cardHtml(p, h);
 }
 
@@ -489,7 +489,7 @@ function liveRefresh() {
           if (known.has(id)) continue;
           const title = e.title.$t.trim();
           const raw = (e.content && e.content.$t) || "";
-          const text = L.stripTags(raw);
+          const text = L.decodeEntities(L.stripTags(raw));
           const href = (e.link.find(l => l.rel === "alternate") || {}).href || "";
           let url = "";
           try {

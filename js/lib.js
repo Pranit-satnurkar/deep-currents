@@ -31,6 +31,21 @@
     return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   }
 
+  const NAMED_ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+
+  /* single-pass decode so an already-escaped "&amp;quot;" never cascades into a
+     literal quote — each &entity; in the source is replaced exactly once */
+  function decodeEntities(s) {
+    return String(s).replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (m, body) => {
+      if (body[0] === "#") {
+        const isHex = body[1] === "x" || body[1] === "X";
+        const num = isHex ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
+        return Number.isFinite(num) ? String.fromCodePoint(num) : m;
+      }
+      return NAMED_ENTITIES[body] || m;
+    });
+  }
+
   function excerptOf(text, limit = 220) {
     if (text.length <= limit) return text;
     let cut = text.slice(0, limit);
@@ -73,6 +88,6 @@
     return best;
   }
 
-  return { yearOf, formatDate, readLengthLabel, stripTags, excerptOf,
+  return { yearOf, formatDate, readLengthLabel, stripTags, decodeEntities, excerptOf,
            escapeHtml, guessMoods, anotherCurrent };
 });

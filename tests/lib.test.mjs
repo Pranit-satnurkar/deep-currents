@@ -19,6 +19,15 @@ test("stripTags and excerptOf", () => {
   assert.equal(lib.excerptOf("a".repeat(30), 15), "a".repeat(15) + "…");
 });
 
+test("decodeEntities handles named, numeric, and hex entities in one pass", () => {
+  assert.equal(lib.decodeEntities("cliché that &quot;the universe&quot;"), 'cliché that "the universe"');
+  assert.equal(lib.decodeEntities("Rock &amp; Roll"), "Rock & Roll");
+  assert.equal(lib.decodeEntities("&#39;quoted&#39; &#x27;again&#x27;"), "'quoted' 'again'");
+  // must not cascade: a literal "&amp;quot;" decodes to "&quot;" text, not a real quote
+  assert.equal(lib.decodeEntities("&amp;quot;"), "&quot;");
+  assert.equal(lib.decodeEntities("no entities here"), "no entities here");
+});
+
 test("escapeHtml", () => {
   assert.equal(lib.escapeHtml(`<a b="c">&'`), "&lt;a b=&quot;c&quot;&gt;&amp;&#39;");
 });
