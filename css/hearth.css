@@ -112,7 +112,17 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
   font-size: 0.9rem; max-width: 36ch; margin: 0.8rem auto 1.1rem; line-height: 1.55; }
 
 /* ===== feed cards ===== */
-.feed { display: grid; gap: 1.1rem; padding-top: 0.8rem; scroll-snap-type: y proximity; }
+.feed { display: flex; flex-direction: column; gap: 1.7rem; position: relative;
+  padding: 0.8rem 0 0 1.5rem; scroll-snap-type: y proximity; }
+.current-line { position: absolute; left: 0; top: 0.6rem; bottom: 0.6rem; width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--ember) 0%,
+    color-mix(in srgb, var(--ember) 35%, transparent) 55%, transparent 100%); }
+.year-group { display: grid; gap: 1.1rem; }
+.year-label { font-family: var(--font-label); font-size: 0.72rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ember);
+  border-top: 1px solid color-mix(in srgb, var(--ember) 15%, transparent);
+  margin: 0.2rem 0 0.9rem; padding-top: 0.8rem; }
 .card { scroll-snap-align: start; scroll-margin-top: 3.2rem; background: var(--card);
   border: 1px solid color-mix(in srgb, var(--ember) 12%, transparent);
   border-radius: 14px; transition: border-color 0.4s, transform 0.4s; }
@@ -128,6 +138,24 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
 .card-moods { display: flex; gap: 0.4rem; margin-top: 0.6rem; }
 .card.fresh { border-color: color-mix(in srgb, var(--ember-bright) 45%, transparent); }
 .empty { text-align: center; color: var(--dusty); font-style: italic; padding: 3rem 0; }
+
+/* the first essay in view: a genuinely different treatment, not a bigger card */
+.card.featured { border-color: color-mix(in srgb, var(--ember) 35%, transparent);
+  background: linear-gradient(160deg, var(--card) 0%, color-mix(in srgb, var(--ink-glow) 55%, var(--card)) 100%); }
+.card.featured .card-link { padding: 1.7rem 1.6rem 1.5rem; }
+.card.featured .card-doodle .doodle { width: 96px; height: 96px; }
+.featured-eyebrow { display: block; font-family: var(--font-label); font-size: 0.68rem;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ember); margin-bottom: 0.9rem; }
+.card.featured .card-title { font-size: 1.55rem; }
+.card.featured .card-excerpt { font-size: 1rem;
+  -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent); mask-image: linear-gradient(180deg, #000 78%, transparent); }
+
+/* size follows substance: short sit reads compact, long night gets more room */
+.card.compact .card-doodle .doodle { width: 46px; height: 46px; }
+.card.compact .card-excerpt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; -webkit-mask-image: none; mask-image: none; }
+.card.rich .card-doodle .doodle { width: 92px; height: 92px; }
+.card.rich .card-title { font-size: 1.38rem; }
 
 /* ===== current read (sticky, dismissible) ===== */
 .current-read { position: sticky; top: 3.2rem; z-index: 4; display: flex; align-items: stretch;

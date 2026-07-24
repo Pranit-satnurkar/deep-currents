@@ -65,18 +65,76 @@ function currentReadInfo() {
 }
 
 /* ---------- feed ---------- */
-function cardHtml(p) {
+function cardHtml(p, extraClass = "", excerptOverride = null) {
   const chips = p.moods.map(m =>
     `<span class="chip chip-static">${L.escapeHtml(App.moods[m] || m)}</span>`).join("");
-  return `<article class="card${p.fresh ? " fresh" : ""}" data-year="${L.yearOf(p.published)}">
+  const excerpt = excerptOverride || p.excerpt;
+  return `<article class="card${p.fresh ? " fresh" : ""}${extraClass}" data-year="${L.yearOf(p.published)}">
     <a class="card-link" href="#/${p.slug}">
       <div class="card-doodle">${doodleSvg(p.doodle)}</div>
       <h2 class="card-title">${L.escapeHtml(p.title)}</h2>
       <p class="card-meta">${L.formatDate(p.published)} · ${p.readLength}${p.fresh ? " · fresh from the fire" : ""}</p>
-      <p class="card-excerpt">${L.escapeHtml(p.excerpt)}</p>
+      <p class="card-excerpt">${L.escapeHtml(excerpt)}</p>
       <span class="card-moods">${chips}</span>
     </a>
   </article>`;
+}
+
+/* the newest essay in view gets a distinct, larger treatment */
+function featuredHtml(p) {
+  const chips = p.moods.map(m =>
+    `<span class="chip chip-static">${L.escapeHtml(App.moods[m] || m)}</span>`).join("");
+  const excerpt = L.excerptOf(L.stripTags(p.html), 380);
+  return `<article class="card featured" data-year="${L.yearOf(p.published)}">
+    <a class="card-link" href="#/${p.slug}">
+      <span class="featured-eyebrow">latest current</span>
+      <div class="card-doodle">${doodleSvg(p.doodle)}</div>
+      <h2 class="card-title">${L.escapeHtml(p.title)}</h2>
+      <p class="card-meta">${L.formatDate(p.published)} · ${p.readLength}${p.fresh ? " · fresh from the fire" : ""}</p>
+      <p class="card-excerpt">${L.escapeHtml(excerpt)}</p>
+      <span class="card-moods">${chips}</span>
+    </a>
+  </article>`;
+}
+
+/* word-count tertiles across the whole archive, not just the tier label — most Deep
+   Currents essays are short, so the "short sit"/"long night" labels alone barely vary;
+   relative position within the actual archive does. */
+function wordTertiles() {
+  const words = App.posts.map(p => p.words).sort((a, b) => a - b);
+  const n = words.length;
+  return { low: words[Math.floor(n / 3)], high: words[Math.floor((2 * n) / 3)] };
+}
+
+/* size follows substance: shortest third reads compact, longest third gets more room */
+function feedCardHtml(p, tertiles) {
+  if (p.words <= tertiles.low) return cardHtml(p, " compact");
+  if (p.words >= tertiles.high) return cardHtml(p, " rich", L.excerptOf(L.stripTags(p.html), 320));
+  return cardHtml(p);
+}
+
+/* featured essay, then the rest threaded through real year sections */
+function feedListHtml(posts) {
+  if (!posts.length) return `<p class="empty">no embers here tonight.</p>`;
+  const tertiles = wordTertiles();
+  const [first, ...rest] = posts;
+  const groups = [];
+  for (const p of rest) {
+    const y = L.yearOf(p.published);
+    const g = groups[groups.length - 1];
+    if (!g || g.year !== y) groups.push({ year: y, posts: [p] });
+    else g.posts.push(p);
+  }
+  const groupsHtml = groups.map(g => `
+    <section class="year-group">
+      <h3 class="year-label">${g.year}</h3>
+      ${g.posts.map(p => feedCardHtml(p, tertiles)).join("")}
+    </section>`).join("");
+  return `<div class="feed">
+    ${featuredHtml(first)}
+    <div class="current-line" aria-hidden="true"></div>
+    ${groupsHtml}
+  </div>`;
 }
 
 const HERO_FRAMING = "Small essays on solitude, purpose, and the quiet mechanics of being a person — written from the deep hours.";
@@ -148,9 +206,7 @@ function renderFeed() {
   document.getElementById("rail").hidden = false;
   document.getElementById("chips").hidden = false;
   const visited = Store.get("hearth.visited", false);
-  view.innerHTML = currentReadHtml() + heroHtml(visited) + (posts.length
-    ? `<div class="feed">${posts.map(cardHtml).join("")}</div>`
-    : `<p class="empty">no embers here tonight.</p>`);
+  view.innerHTML = currentReadHtml() + heroHtml(visited) + feedListHtml(posts);
   if (!visited) Store.set("hearth.visited", true);
   const dismiss = document.getElementById("dismissCurrent");
   if (dismiss) dismiss.onclick = (ev) => {
