@@ -119,10 +119,18 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
   background: linear-gradient(180deg, var(--ember) 0%,
     color-mix(in srgb, var(--ember) 35%, transparent) 55%, transparent 100%); }
 .year-group { display: grid; gap: 1.1rem; }
-.year-label { font-family: var(--font-label); font-size: 0.72rem; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--ember);
+.year-label { grid-column: 1 / -1; font-family: var(--font-label); font-size: 0.72rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ember);
   border-top: 1px solid color-mix(in srgb, var(--ember) 15%, transparent);
   margin: 0.2rem 0 0.9rem; padding-top: 0.8rem; }
+.year-extra { display: none; }
+.year-group.expanded .year-extra { display: block; }
+.year-reveal { grid-column: 1 / -1; justify-self: start; font-family: var(--font-label);
+  font-size: 0.78rem; letter-spacing: 0.03em; color: var(--dusty); background: none; cursor: pointer;
+  border: 1px dashed color-mix(in srgb, var(--dusty) 40%, transparent); border-radius: 999px;
+  padding: 0.5rem 1rem; min-height: 40px; margin-top: 0.2rem; transition: color 0.25s, border-color 0.25s; }
+.year-reveal:hover, .year-reveal:focus-visible { color: var(--ember);
+  border-color: color-mix(in srgb, var(--ember) 45%, transparent); }
 .card { scroll-snap-align: start; scroll-margin-top: 3.2rem; background: var(--card);
   border: 1px solid color-mix(in srgb, var(--ember) 12%, transparent);
   border-radius: 14px; transition: border-color 0.4s, transform 0.4s; }
@@ -257,4 +265,5 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
 @media (min-width: 700px) {
   .card-title { font-size: 1.35rem; }
   .reader-title { font-size: 2rem; }
+  .year-group { grid-template-columns: 1fr 1fr; }
 }

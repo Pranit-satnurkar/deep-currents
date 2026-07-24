@@ -107,11 +107,17 @@ function wordTertiles() {
 }
 
 /* size follows substance: shortest third reads compact, longest third gets more room */
-function feedCardHtml(p, tertiles) {
-  if (p.words <= tertiles.low) return cardHtml(p, " compact");
-  if (p.words >= tertiles.high) return cardHtml(p, " rich", L.excerptOf(L.stripTags(p.html), 320));
-  return cardHtml(p);
+function feedCardHtml(p, tertiles, hidden = false) {
+  const h = hidden ? " year-extra" : "";
+  if (p.words <= tertiles.low) return cardHtml(p, " compact" + h);
+  if (p.words >= tertiles.high) return cardHtml(p, " rich" + h, L.excerptOf(L.stripTags(p.html), 320));
+  return cardHtml(p, h);
 }
+
+/* Deep Currents has 34 essays but is wildly uneven by year (4 / 22 / 8) — dumping
+   all of them is exactly the "scroll and scroll" problem. Show a handful per year,
+   let the reader pull the rest of that year forward on demand. */
+const VISIBLE_PER_YEAR = 4;
 
 /* featured essay, then the rest threaded through real year sections */
 function feedListHtml(posts) {
@@ -125,11 +131,20 @@ function feedListHtml(posts) {
     if (!g || g.year !== y) groups.push({ year: y, posts: [p] });
     else g.posts.push(p);
   }
-  const groupsHtml = groups.map(g => `
+  const groupsHtml = groups.map(g => {
+    const visible = g.posts.slice(0, VISIBLE_PER_YEAR);
+    const extra = g.posts.slice(VISIBLE_PER_YEAR);
+    const reveal = extra.length
+      ? `<button type="button" class="year-reveal" data-year="${g.year}">see ${extra.length} more from ${g.year} &darr;</button>`
+      : "";
+    return `
     <section class="year-group">
       <h3 class="year-label">${g.year}</h3>
-      ${g.posts.map(p => feedCardHtml(p, tertiles)).join("")}
-    </section>`).join("");
+      ${visible.map(p => feedCardHtml(p, tertiles)).join("")}
+      ${extra.map(p => feedCardHtml(p, tertiles, true)).join("")}
+      ${reveal}
+    </section>`;
+  }).join("");
   return `<div class="feed">
     ${featuredHtml(first)}
     <div class="current-line" aria-hidden="true"></div>
@@ -225,6 +240,12 @@ function renderFeed() {
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
     target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   };
+  view.querySelectorAll(".year-reveal").forEach(btn => btn.onclick = () => {
+    const group = btn.closest(".year-group");
+    group.classList.add("expanded");
+    btn.remove();
+    igniteDoodles(group);
+  });
   watchFeed();
 }
 
