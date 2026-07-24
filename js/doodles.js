@@ -277,11 +277,12 @@
       "M60 96 C38 84 34 62 46 44 C52 36 56 28 55 18 C70 30 84 48 82 68 C81 82 72 92 60 96 Z",
       "M60 84 C52 78 50 68 56 60 C59 56 60 52 59 47 C67 54 72 63 70 72 C69 78 65 82 60 84",
     ]),
-    // taller doodled flame with two inner licks (header; Task 8 animates flicker)
+    // twin campfire tongues — main lick plus a smaller one beside it (header; Task 8 animates flicker)
     "hearth-flame": v([
-      "M60 102 C34 86 30 56 46 34 C54 24 58 16 56 8 C77 24 90 46 86 70 C84 87 74 97 60 102 Z",
-      "M60 88 C48 78 46 60 54 48 C58 42 59 35 57 30 C69 40 75 55 72 67 C71 77 66 83 60 88",
-      "M60 74 C54 68 53 57 58 50 C63 60 65 67 60 74",
+      "M60 96 C38 84 34 62 46 44 C52 36 56 28 55 18 C70 30 84 48 82 68 C81 82 72 92 60 96 Z",
+      "M60 84 C52 78 50 68 56 60 C59 56 60 52 59 47 C67 54 72 63 70 72 C69 78 65 82 60 84",
+      "M92 100 C80 92 77 78 84 66 C88 60 90 55 89 48 C98 55 106 66 104 78 C103 87 98 94 92 100 Z",
+      "M92 92 C87 88 86 82 89 77 C91 74 92 71 91 68 C96 72 99 78 98 84 C97 88 95 90 92 92",
     ]),
     // quill pen whose feather tip curls into a small flame
     "scribbler-quill": v([

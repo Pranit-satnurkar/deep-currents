@@ -79,6 +79,19 @@ function cardHtml(p) {
   </article>`;
 }
 
+const HERO_FRAMING = "Small essays on solitude, purpose, and the quiet mechanics of being a person — written from the deep hours.";
+
+function heroHtml(visited) {
+  if (visited) return `<p class="hero-compact">${L.escapeHtml(HERO_FRAMING)}</p>`;
+  return `<div class="hero-full">
+    <div class="hero-doodle">${doodleSvg("hearth-flame", "flame")}</div>
+    <h1 class="hero-title">Deep Currents</h1>
+    <p class="hero-tagline">quiet essays for the deep hours</p>
+    <p class="hero-framing">${L.escapeHtml(HERO_FRAMING)}</p>
+    <button class="hero-cta" id="heroCta">step into the fire &darr;</button>
+  </div>`;
+}
+
 function currentReadHtml() {
   const info = currentReadInfo();
   if (!info) return "";
@@ -134,9 +147,11 @@ function renderFeed() {
   const posts = App.filter ? App.posts.filter(p => p.moods.includes(App.filter)) : App.posts;
   document.getElementById("rail").hidden = false;
   document.getElementById("chips").hidden = false;
-  view.innerHTML = currentReadHtml() + (posts.length
+  const visited = Store.get("hearth.visited", false);
+  view.innerHTML = currentReadHtml() + heroHtml(visited) + (posts.length
     ? `<div class="feed">${posts.map(cardHtml).join("")}</div>`
     : `<p class="empty">no embers here tonight.</p>`);
+  if (!visited) Store.set("hearth.visited", true);
   const dismiss = document.getElementById("dismissCurrent");
   if (dismiss) dismiss.onclick = (ev) => {
     ev.preventDefault();
@@ -144,6 +159,15 @@ function renderFeed() {
     if (info && info.source === "bookmark") clearBookmark();
     else Store.set("hearth.resume", null);
     renderFeed();
+  };
+  const heroDoodle = view.querySelector(".hero-doodle");
+  if (heroDoodle) igniteDoodles(heroDoodle);
+  const cta = document.getElementById("heroCta");
+  if (cta) cta.onclick = () => {
+    const target = view.querySelector(".feed") || view.querySelector(".empty");
+    if (!target) return;
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   };
   watchFeed();
 }

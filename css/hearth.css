@@ -92,6 +92,25 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
 .rail-seg small { font-family: var(--font-label); font-size: 0.58rem; color: var(--parchment-dim); }
 .rail-seg.glow span { background: var(--ember-bright); box-shadow: 0 0 8px var(--ember); }
 
+/* ===== hero ===== */
+.hero-full { text-align: center; padding: 2rem 1rem 1.8rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ember) 15%, transparent); margin-bottom: 0.4rem; }
+.hero-doodle { display: flex; justify-content: center; margin-bottom: 0.7rem; }
+.hero-doodle .doodle { width: 64px; height: 64px; }
+.hero-title { font-family: var(--font-display); font-weight: 700; font-size: 2rem;
+  line-height: 1.15; color: var(--parchment); margin: 0 0 0.3rem; }
+.hero-tagline { font-family: var(--font-label); font-size: 0.85rem; color: var(--parchment-dim);
+  letter-spacing: 0.04em; margin-bottom: 1.2rem; }
+.hero-framing { color: var(--parchment-dim); font-size: 0.98rem; line-height: 1.6;
+  max-width: 34ch; margin: 0 auto 1.4rem; }
+.hero-cta { font-family: var(--font-label); font-size: 0.82rem; letter-spacing: 0.03em;
+  color: var(--ember); background: none; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ember) 50%, transparent); border-radius: 999px;
+  padding: 0.55rem 1.2rem; min-height: 40px; transition: background 0.3s, color 0.3s; }
+.hero-cta:hover, .hero-cta:focus-visible { background: var(--ember); color: var(--ink-deep); }
+.hero-compact { text-align: center; color: var(--parchment-dim); font-style: italic;
+  font-size: 0.9rem; max-width: 36ch; margin: 0.8rem auto 1.1rem; line-height: 1.55; }
+
 /* ===== feed cards ===== */
 .feed { display: grid; gap: 1.1rem; padding-top: 0.8rem; scroll-snap-type: y proximity; }
 .card { scroll-snap-align: start; scroll-margin-top: 3.2rem; background: var(--card);
