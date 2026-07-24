@@ -119,13 +119,12 @@ function feedCardHtml(p, tertiles, hidden = false) {
    let the reader pull the rest of that year forward on demand. */
 const VISIBLE_PER_YEAR = 4;
 
-/* featured essay, then the rest threaded through real year sections */
+/* the full browsable list (Archive route) — threaded through real year sections */
 function feedListHtml(posts) {
   if (!posts.length) return `<p class="empty">no embers here tonight.</p>`;
   const tertiles = wordTertiles();
-  const [first, ...rest] = posts;
   const groups = [];
-  for (const p of rest) {
+  for (const p of posts) {
     const y = L.yearOf(p.published);
     const g = groups[groups.length - 1];
     if (!g || g.year !== y) groups.push({ year: y, posts: [p] });
@@ -146,10 +145,39 @@ function feedListHtml(posts) {
     </section>`;
   }).join("");
   return `<div class="feed">
-    ${featuredHtml(first)}
     <div class="current-line" aria-hidden="true"></div>
     ${groupsHtml}
   </div>`;
+}
+
+/* home shows 3 picks from moods the featured essay doesn't already cover,
+   most recent within each — deterministic, recomputed every render. Each
+   pick remembers WHICH mood earned it a slot, not just its own first-listed
+   mood (an essay can carry 2), so the displayed labels are genuinely distinct. */
+function startingPicks(featured) {
+  const featuredMoods = new Set(featured.moods);
+  const candidates = App.posts.filter(p => p.slug !== featured.slug);
+  const picks = [];
+  const pickedSlugs = new Set();
+  for (const mood of Object.keys(App.moods)) {
+    if (picks.length === 3) break;
+    if (featuredMoods.has(mood)) continue;
+    const match = candidates.find(p => p.moods.includes(mood) && !pickedSlugs.has(p.slug));
+    if (match) { picks.push({ post: match, mood }); pickedSlugs.add(match.slug); }
+  }
+  for (const p of candidates) {
+    if (picks.length === 3) break;
+    if (!pickedSlugs.has(p.slug)) { picks.push({ post: p, mood: p.moods[0] }); pickedSlugs.add(p.slug); }
+  }
+  return picks;
+}
+
+function pickHtml({ post, mood }) {
+  const moodLabel = App.moods[mood] || mood || "";
+  return `<a class="pick" href="#/${post.slug}">
+    <span class="pick-title">${L.escapeHtml(post.title)}</span>
+    <span class="pick-mood">${L.escapeHtml(moodLabel)}</span>
+  </a>`;
 }
 
 const HERO_FRAMING = "Small essays on solitude, purpose, and the quiet mechanics of being a person — written from the deep hours.";
@@ -161,7 +189,7 @@ function heroHtml(visited) {
     <h1 class="hero-title">Deep Currents</h1>
     <p class="hero-tagline">quiet essays for the deep hours</p>
     <p class="hero-framing">${L.escapeHtml(HERO_FRAMING)}</p>
-    <button class="hero-cta" id="heroCta">step into the fire &darr;</button>
+    <a class="hero-cta" href="#/archive">step into the fire &rarr;</a>
   </div>`;
 }
 
@@ -184,7 +212,7 @@ function renderChips() {
   ).join("");
   el.querySelectorAll(".chip").forEach(b => b.onclick = () => {
     App.filter = App.filter === b.dataset.mood ? null : b.dataset.mood;
-    renderChips(); renderFeed();
+    renderChips(); renderArchive();
   });
 }
 
@@ -216,12 +244,20 @@ function watchFeed() {
   view.querySelectorAll(".card").forEach(c => feedObserver.observe(c));
 }
 
-function renderFeed() {
-  const posts = App.filter ? App.posts.filter(p => p.moods.includes(App.filter)) : App.posts;
-  document.getElementById("rail").hidden = false;
-  document.getElementById("chips").hidden = false;
+/* ---------- home: short curated landing ---------- */
+function renderHome() {
+  document.getElementById("rail").hidden = true;
+  document.getElementById("chips").hidden = true;
   const visited = Store.get("hearth.visited", false);
-  view.innerHTML = currentReadHtml() + heroHtml(visited) + feedListHtml(posts);
+  const body = App.posts.length
+    ? featuredHtml(App.posts[0]) +
+      `<div class="starting-picks">
+        <h3 class="picks-label">a few to start with</h3>
+        ${startingPicks(App.posts[0]).map(pickHtml).join("")}
+      </div>
+      <a class="browse-archive" href="#/archive">browse all ${App.posts.length} &rarr;</a>`
+    : `<p class="empty">no embers here tonight.</p>`;
+  view.innerHTML = currentReadHtml() + heroHtml(visited) + body;
   if (!visited) Store.set("hearth.visited", true);
   const dismiss = document.getElementById("dismissCurrent");
   if (dismiss) dismiss.onclick = (ev) => {
@@ -229,16 +265,24 @@ function renderFeed() {
     const info = currentReadInfo();
     if (info && info.source === "bookmark") clearBookmark();
     else Store.set("hearth.resume", null);
-    renderFeed();
+    renderHome();
   };
-  const heroDoodle = view.querySelector(".hero-doodle");
-  if (heroDoodle) igniteDoodles(heroDoodle);
-  const cta = document.getElementById("heroCta");
-  if (cta) cta.onclick = () => {
-    const target = view.querySelector(".feed") || view.querySelector(".empty");
-    if (!target) return;
-    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  igniteDoodles(view);
+}
+
+/* ---------- archive: the full browsable list ---------- */
+function renderArchive() {
+  const posts = App.filter ? App.posts.filter(p => p.moods.includes(App.filter)) : App.posts;
+  document.getElementById("rail").hidden = false;
+  document.getElementById("chips").hidden = false;
+  view.innerHTML = currentReadHtml() + feedListHtml(posts);
+  const dismiss = document.getElementById("dismissCurrent");
+  if (dismiss) dismiss.onclick = (ev) => {
+    ev.preventDefault();
+    const info = currentReadInfo();
+    if (info && info.source === "bookmark") clearBookmark();
+    else Store.set("hearth.resume", null);
+    renderArchive();
   };
   view.querySelectorAll(".year-reveal").forEach(btn => btn.onclick = () => {
     const group = btn.closest(".year-group");
@@ -423,11 +467,12 @@ function renderReader(post) {
 function render() {
   const h = location.hash.replace(/^#\/?/, "");
   if (feedObserver) feedObserver.disconnect();
-  if (!h) return renderFeed();
+  if (!h) return renderHome();
+  if (h === "archive") return renderArchive();
   if (h === "kept") return renderKept();
   if (h === "about") return renderAbout();
   const post = App.posts.find(p => p.slug === h);
-  return post ? renderReader(post) : renderFeed();
+  return post ? renderReader(post) : renderHome();
 }
 
 /* ---------- live refresh ---------- */
@@ -471,8 +516,9 @@ function liveRefresh() {
       if (!fresh.length) return;
       App.posts = [...fresh, ...App.posts]
         .sort((a, b) => b.published.localeCompare(a.published));
-      const onFeed = !location.hash.replace(/^#\/?/, "");
-      if (onFeed && scrollY < 200) { renderRail(); render(); }
+      const h = location.hash.replace(/^#\/?/, "");
+      const onFeedish = h === "" || h === "archive";
+      if (onFeedish && scrollY < 200) { renderRail(); render(); }
     } catch (err) { /* silent by design */ }
   };
   const s = document.createElement("script");
