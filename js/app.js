@@ -49,19 +49,11 @@ function currentScrollRatio() {
   return max > 0 ? Math.min(1, scrollY / max) : 1;
 }
 
-/* explicit bookmark wins; ambient resume is the fallback (today's behavior) */
 function currentReadInfo() {
-  const b = getBookmark();
-  if (b) {
-    const p = App.posts.find(x => x.slug === b.slug);
-    if (p) return { post: p, source: "bookmark" };
-  }
-  const r = Store.get("hearth.resume", null);
-  if (r && r.ratio >= 0.02 && r.ratio <= 0.97) {
-    const p = App.posts.find(x => x.slug === r.slug);
-    if (p) return { post: p, source: "resume" };
-  }
-  return null;
+  const place = L.resolveCurrentRead(getBookmark(), Store.get("hearth.resume", null), { resumeMax: 0.97 });
+  if (!place) return null;
+  const p = App.posts.find(x => x.slug === place.slug);
+  return p ? { post: p, source: place.source } : null;
 }
 
 /* ---------- feed ---------- */
@@ -456,10 +448,10 @@ function renderReader(post) {
   const onNavClick = (ev) => { if (ev.target.closest("a[href^='#']")) stop(); };
   document.addEventListener("click", onNavClick, true);
   window.addEventListener("hashchange", stop);
-  const r = Store.get("hearth.resume", null);
-  if (r && r.slug === post.slug && r.ratio > 0.02) {
+  const place = L.resolveCurrentRead(getBookmark(), Store.get("hearth.resume", null), { slug: post.slug });
+  if (place && place.ratio > 0.02) {
     requestAnimationFrame(() =>
-      window.scrollTo(0, r.ratio * (document.documentElement.scrollHeight - innerHeight)));
+      window.scrollTo(0, place.ratio * (document.documentElement.scrollHeight - innerHeight)));
   }
 }
 

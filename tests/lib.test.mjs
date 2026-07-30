@@ -37,6 +37,35 @@ test("guessMoods finds rain, falls back to quiet", () => {
   assert.deepEqual(lib.guessMoods("Untitled", "nothing matching here at all zzz"), ["quiet"]);
 });
 
+test("resolveCurrentRead: bookmark wins over resume for its own post", () => {
+  const bookmark = { slug: "a", ratio: 0.5 };
+  const resume = { slug: "b", ratio: 0.3 };
+  assert.deepEqual(lib.resolveCurrentRead(bookmark, resume, { slug: "a" }),
+    { slug: "a", ratio: 0.5, source: "bookmark" });
+});
+
+test("resolveCurrentRead: falls back to resume when bookmark is for a different post", () => {
+  const bookmark = { slug: "a", ratio: 0.5 };
+  const resume = { slug: "b", ratio: 0.3 };
+  assert.deepEqual(lib.resolveCurrentRead(bookmark, resume, { slug: "b" }),
+    { slug: "b", ratio: 0.3, source: "resume" });
+});
+
+test("resolveCurrentRead: null when neither matches the requested slug", () => {
+  const bookmark = { slug: "a", ratio: 0.5 };
+  const resume = { slug: "b", ratio: 0.3 };
+  assert.equal(lib.resolveCurrentRead(bookmark, resume, { slug: "c" }), null);
+});
+
+test("resolveCurrentRead: no slug filter picks bookmark first, else bounded resume", () => {
+  assert.equal(lib.resolveCurrentRead(null, { slug: "b", ratio: 0.01 }), null); // below 0.02 min
+  assert.equal(lib.resolveCurrentRead(null, { slug: "b", ratio: 0.98 }, { resumeMax: 0.97 }), null); // above resumeMax
+  assert.deepEqual(lib.resolveCurrentRead(null, { slug: "b", ratio: 0.5 }, { resumeMax: 0.97 }),
+    { slug: "b", ratio: 0.5, source: "resume" });
+  assert.deepEqual(lib.resolveCurrentRead({ slug: "a", ratio: 0.99 }, { slug: "b", ratio: 0.5 }),
+    { slug: "a", ratio: 0.99, source: "bookmark" });
+});
+
 test("anotherCurrent prefers shared moods then date proximity", () => {
   const posts = [
     { slug: "a", moods: ["rain", "quiet"], published: "2026-01-01T00:00:00Z" },

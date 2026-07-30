@@ -70,6 +70,20 @@
                  .slice(0, 2).map(([m]) => m);
   }
 
+  /* explicit bookmark wins; ambient resume is the fallback, and only within a
+     meaningful scroll window (never "barely started"; resumeMax additionally
+     excludes "basically finished" for callers that want that, e.g. the strip) */
+  function resolveCurrentRead(bookmark, resume, { slug = null, resumeMax = 1 } = {}) {
+    if (bookmark && (slug === null || bookmark.slug === slug)) {
+      return { slug: bookmark.slug, ratio: bookmark.ratio, source: "bookmark" };
+    }
+    if (resume && (slug === null || resume.slug === slug) &&
+        resume.ratio >= 0.02 && resume.ratio <= resumeMax) {
+      return { slug: resume.slug, ratio: resume.ratio, source: "resume" };
+    }
+    return null;
+  }
+
   function anotherCurrent(slug, posts) {
     if (posts.length < 2) return null;
     const self = posts.find(p => p.slug === slug);
@@ -89,5 +103,5 @@
   }
 
   return { yearOf, formatDate, readLengthLabel, stripTags, decodeEntities, excerptOf,
-           escapeHtml, guessMoods, anotherCurrent };
+           escapeHtml, guessMoods, resolveCurrentRead, anotherCurrent };
 });
