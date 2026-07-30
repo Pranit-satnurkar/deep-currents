@@ -39,21 +39,17 @@ function toggleKept(slug) {
   Store.set("hearth.kept", k.includes(slug) ? k.filter(s => s !== slug) : [...k, slug]);
 }
 
-/* ---------- current read (bookmark) ---------- */
-function getBookmark() { return Store.get("hearth.bookmark", null); }
-function setBookmark(slug, ratio) { Store.set("hearth.bookmark", { slug, ratio }); }
-function clearBookmark() { Store.set("hearth.bookmark", null); }
-
+/* ---------- current read (ambient resume) ---------- */
 function currentScrollRatio() {
   const max = document.documentElement.scrollHeight - innerHeight;
   return max > 0 ? Math.min(1, scrollY / max) : 1;
 }
 
 function currentReadInfo() {
-  const place = L.resolveCurrentRead(getBookmark(), Store.get("hearth.resume", null), { resumeMax: 0.97 });
-  if (!place) return null;
-  const p = App.posts.find(x => x.slug === place.slug);
-  return p ? { post: p, source: place.source } : null;
+  const r = Store.get("hearth.resume", null);
+  if (!r || r.ratio < 0.02 || r.ratio > 0.97) return null;
+  const p = App.posts.find(x => x.slug === r.slug);
+  return p ? { post: p } : null;
 }
 
 /* ---------- feed ---------- */
@@ -254,9 +250,7 @@ function renderHome() {
   const dismiss = document.getElementById("dismissCurrent");
   if (dismiss) dismiss.onclick = (ev) => {
     ev.preventDefault();
-    const info = currentReadInfo();
-    if (info && info.source === "bookmark") clearBookmark();
-    else Store.set("hearth.resume", null);
+    Store.set("hearth.resume", null);
     renderHome();
   };
   igniteDoodles(view);
@@ -271,9 +265,7 @@ function renderArchive() {
   const dismiss = document.getElementById("dismissCurrent");
   if (dismiss) dismiss.onclick = (ev) => {
     ev.preventDefault();
-    const info = currentReadInfo();
-    if (info && info.source === "bookmark") clearBookmark();
-    else Store.set("hearth.resume", null);
+    Store.set("hearth.resume", null);
     renderArchive();
   };
   view.querySelectorAll(".year-reveal").forEach(btn => btn.onclick = () => {
@@ -333,7 +325,6 @@ function renderReader(post) {
       <div class="reader-actions">
         <button class="keep${isKept(post.slug) ? " kept" : ""}" id="keepBtn">
           ${isKept(post.slug) ? "kept by the fire" : "keep by the fire"}</button>
-        <button class="mark-place" id="markPlaceBtn">mark my place</button>
       </div>
       <p class="canonical"><a href="${L.escapeHtml(post.url)}" rel="canonical noopener" target="_blank">this essay also lives at Deep Currents on Blogger</a></p>
       ${next ? `<div class="another"><h3>another current</h3>${cardHtml(next)}</div>` : ""}
@@ -362,17 +353,6 @@ function renderReader(post) {
     ev.target.classList.toggle("kept", isKept(post.slug));
     ev.target.textContent = isKept(post.slug) ? "kept by the fire" : "keep by the fire";
     renderHeaderFlame();
-  };
-
-  const markBtn = document.getElementById("markPlaceBtn");
-  markBtn.onclick = () => {
-    setBookmark(post.slug, currentScrollRatio());
-    markBtn.textContent = "place marked";
-    markBtn.classList.add("marked");
-    setTimeout(() => {
-      markBtn.textContent = "mark my place";
-      markBtn.classList.remove("marked");
-    }, 1400);
   };
 
   // ---------- feedback form ----------
@@ -427,11 +407,6 @@ function renderReader(post) {
       const ratio = currentScrollRatio();
       bar.style.width = (ratio * 100) + "%";
       Store.set("hearth.resume", ratio > 0.97 ? null : { slug: post.slug, ratio });
-      // Only clear the bookmark once the reader has genuinely read past where they
-      // marked — not merely because the scroll settled at/near the same position
-      // (e.g. the auto-scroll that brings "mark my place" into view on tap).
-      const bm = getBookmark();
-      if (bm && bm.slug === post.slug && ratio > 0.97 && ratio > bm.ratio + 0.005) clearBookmark();
     });
   };
   window.addEventListener("scroll", onScroll, { passive: true });
@@ -448,10 +423,10 @@ function renderReader(post) {
   const onNavClick = (ev) => { if (ev.target.closest("a[href^='#']")) stop(); };
   document.addEventListener("click", onNavClick, true);
   window.addEventListener("hashchange", stop);
-  const place = L.resolveCurrentRead(getBookmark(), Store.get("hearth.resume", null), { slug: post.slug });
-  if (place && place.ratio > 0.02) {
+  const r = Store.get("hearth.resume", null);
+  if (r && r.slug === post.slug && r.ratio > 0.02) {
     requestAnimationFrame(() =>
-      window.scrollTo(0, place.ratio * (document.documentElement.scrollHeight - innerHeight)));
+      window.scrollTo(0, r.ratio * (document.documentElement.scrollHeight - innerHeight)));
   }
 }
 

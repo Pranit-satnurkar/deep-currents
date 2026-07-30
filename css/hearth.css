@@ -233,14 +233,12 @@ main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
 .reader-foot { margin-top: 2.5rem; border-top: 1px solid color-mix(in srgb, var(--ember) 15%, transparent);
   padding-top: 1.4rem; }
 .reader-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.keep, .mark-place { font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.04em;
+.keep { font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.04em;
   color: var(--ember); background: none; cursor: pointer;
   border: 1px solid color-mix(in srgb, var(--ember) 50%, transparent);
   border-radius: 999px; padding: 0.5rem 1.1rem; transition: background 0.3s, color 0.3s;
   min-height: 40px; display: inline-flex; align-items: center; }
 .keep.kept { background: var(--ember); color: var(--ink-deep); }
-.mark-place { color: var(--dusty); border-color: color-mix(in srgb, var(--dusty) 45%, transparent); }
-.mark-place.marked { color: var(--ember); border-color: color-mix(in srgb, var(--ember) 50%, transparent); }
 .canonical { margin: 1rem 0 1.8rem; font-size: 0.8rem; }
 .another h3 { font-family: var(--font-label); font-size: 0.7rem; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--dusty); margin-bottom: 0.6rem; }
